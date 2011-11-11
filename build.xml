@@ -1,7 +1,8 @@
 <project name="cf-websocket-gateway" default="make" basedir=".">
     <property name="java.home" value="env.JAVA_HOME"/>
-    <property name="cf.home" value="/Applications/Jrun4/servers/cfusion/cfusion-ear/cfusion-war/WEB-INF/cfusion"/>
+    <property name="cf.home" value="F:\ColdFusion9"/>
     <property name="cfusionjar" value="${cf.home}/lib/cfusion.jar"/>
+	<property name="webbitjar" value="${cf.home}/lib/netty-3.2.6.Final.jar"/>
 	<property file="version.properties"/>
 	
     <target name="make" depends="clean,compile,jar" description="The default: build everything"/>
@@ -16,11 +17,11 @@
 
     <target name="clean" description="Remove compiled classes and jar.">
         <delete dir="${basedir}/bin"/>
-    </target>
+    </target> 
 
     <target name="compile" description="Compile the java classes.">
         <mkdir dir="${basedir}/bin"/>
-        <javac srcdir="${basedir}/src" destdir="${basedir}/bin" fork="true" classpath="${cfusionjar}"/>
+        <javac srcdir="${basedir}/src" destdir="${basedir}/bin" fork="true" classpath="${cfusionjar}:${webbitjar}"/>
     </target>
 
     <target name="remove-files" description="Removes the files from the ColdFusion server.">

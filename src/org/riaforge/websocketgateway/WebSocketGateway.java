@@ -14,9 +14,11 @@ import coldfusion.eventgateway.GatewayServices;
 import coldfusion.eventgateway.Logger;
 import coldfusion.runtime.Array;
 
-import net.tootallnate.websocket.*;
+//import net.tootallnate.websocket.WebSocketServer;
+//import net.tootallnate.websocket.WebSocket;
+import org.webbitserver.WebSocketConnection;
 
-public class WebSocketGateway extends WebSocketServer implements Gateway {
+public class WebSocketGateway extends CustomWebSocketServer implements Gateway {
 
     // The handle to the CF gateway service
     protected GatewayServices gatewayService = null;
@@ -31,7 +33,7 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
     protected String cfcEntryPoint = "onIncomingMessage";
     
     // A collection of connected clients
-    private Hashtable<String, WebSocket> connectionRegistry = new Hashtable<String, WebSocket>();
+    private Hashtable<String, WebSocketConnection> connectionRegistry = new Hashtable<String, WebSocketConnection>();
 
     // Out status
     protected int status = STOPPED;
@@ -73,10 +75,10 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
         }
         
         setPort(port);
-        setOrigin(origin);
-        setSubProtocol(subprotocol);
+        //setOrigin(origin);
+        //setSubProtocol(subprotocol);
         
-        log.info("WebSocketGateway(" + gatewayID + ") configured on port" + port + ".");
+        log.info("WebSocketGateway(" + gatewayID + ") configured on PORT " + port + ".");
 
     }
 
@@ -113,7 +115,7 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
             String message = value.toString();
             
             String theKey = (String) data.get("DESTINATIONWEBSOCKETID");
-            WebSocket conn = null;
+            WebSocketConnection conn = null;
             if (theKey != null) {
                 conn = connectionRegistry.get(theKey);
                 if (conn != null) {
@@ -128,12 +130,12 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
             }
             
             Array keys = (Array) data.get("DESTINATIONWEBSOCKETIDS");
-            HashSet<WebSocket> conns = null;
+            HashSet<WebSocketConnection> conns = null;
             if(keys != null) {
-                conns = new HashSet<WebSocket>(keys.size());
+                conns = new HashSet<WebSocketConnection>(keys.size());
                 for (int i = 0; i < keys.size(); i++)
                 {
-                    WebSocket c = connectionRegistry.get(keys.get(i));
+                	WebSocketConnection c = connectionRegistry.get(keys.get(i));
                     if (c != null) {
                         conns.add(c);
                     }
@@ -279,7 +281,7 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
     }
 
     @Override
-    public void onClientClose(WebSocket conn) {
+    public void onClose(WebSocketConnection conn) {
      // Get a key for the connection
         String theKey = getUniqueKey(conn);
         connectionRegistry.remove(theKey);
@@ -313,7 +315,7 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
     }
 
     @Override
-    public void onClientMessage(WebSocket conn, String message) {
+    public void onMessage(WebSocketConnection conn, String message) {
         // Get a key for the connection
         String theKey = getUniqueKey(conn);
    
@@ -348,7 +350,7 @@ public class WebSocketGateway extends WebSocketServer implements Gateway {
     }
 
     @Override
-    public void onClientOpen(WebSocket conn) {
+    public void onOpen(WebSocketConnection conn) {
         // Get a key for the connection
         String theKey = getUniqueKey(conn);
         connectionRegistry.put(theKey, conn);
